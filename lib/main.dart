@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './question.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,7 +29,7 @@ class _MyAppState extends State<MyApp> {
             title: Text('My First Page')
         ),
         body: Column(children: <Widget>[
-          Text(questions.elementAt(_questionIndex)),
+          Question(questions.elementAt(_questionIndex)),
           RaisedButton(
             child: Text('Answer1'),
             onPressed: _answerQuestion,
