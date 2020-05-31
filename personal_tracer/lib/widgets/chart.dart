@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:personal_tracer/models/transaction.dart';
 import 'package:intl/intl.dart';
+import 'package:personal_tracer/widgets/chart_bar.dart';
 
 class Chart extends StatelessWidget {
   final List<Transaction> recentTransactions;
@@ -20,7 +21,16 @@ class Chart extends StatelessWidget {
         }
       }
 
-      return {'day': DateFormat.E().format(weekDay), 'amount': sumOfAmount};
+      return {
+        'day': DateFormat.E().format(weekDay).substring(0, 1),
+        'amount': sumOfAmount
+      };
+    });
+  }
+
+  double get totalSpending {
+    return groupedTransactionValues.fold(0.0, (previousValue, element) {
+      return previousValue + element['amount'];
     });
   }
 
@@ -29,8 +39,27 @@ class Chart extends StatelessWidget {
     return Card(
       elevation: 6,
       margin: EdgeInsets.all(20),
-      child: Row(
-        children: <Widget>[],
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: groupedTransactionValues.map((e) {
+              return totalSpending == 0.0
+                  ? SizedBox()
+                  : Flexible(
+                      // İçinde bulunduğu container a göre şekil almasını sağlar
+                      fit: FlexFit.tight,
+                      // Hiçbir element kendi bölgesinden daha büyük olamasın
+                      // flex ile bulunulan bölgenin kaç x lik alanı kaplayacağı verilir
+                      // Flexible ile fit tight kullanılacaksa Expanded classı da
+                      // kullanılabilir
+                      child: ChartBar(
+                        e['day'],
+                        e['amount'],
+                        (e['amount'] as double) / totalSpending,
+                      ),
+                    );
+            }).toList()),
       ),
     );
   }
