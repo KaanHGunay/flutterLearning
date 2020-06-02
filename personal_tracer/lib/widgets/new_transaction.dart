@@ -17,15 +17,18 @@ class _NewTransactionState extends State<NewTransaction> {
   DateTime _selectedDate;
 
   void _submitData() {
+    if (_amountController.text.isEmpty) {
+      return;
+    }
     final titleText = _titleController.text;
     final amount = double.parse(_amountController.text);
 
-    if (titleText.isEmpty || amount <= 0) {
+    if (titleText.isEmpty || amount <= 0 || _selectedDate == null) {
       return;
     }
 
     // Diğer class ta verilen parametreleri burada kullanmak için
-    widget.addTx(titleText, amount);
+    widget.addTx(titleText, amount, _selectedDate);
 
     Navigator.of(context).pop();
   }
