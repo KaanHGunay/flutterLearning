@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:personal_tracer/models/transaction.dart';
 import 'package:intl/intl.dart';
-import 'package:personal_tracer/widgets/chart_bar.dart';
+
+import './chart_bar.dart';
+import '../models/transaction.dart';
 
 class Chart extends StatelessWidget {
   final List<Transaction> recentTransactions;
@@ -10,27 +11,29 @@ class Chart extends StatelessWidget {
 
   List<Map<String, Object>> get groupedTransactionValues {
     return List.generate(7, (index) {
-      final weekDay = DateTime.now().subtract(Duration(days: index));
-      double sumOfAmount = 0;
+      final weekDay = DateTime.now().subtract(
+        Duration(days: index),
+      );
+      var totalSum = 0.0;
 
-      for (int i = 0; i < recentTransactions.length; i++) {
+      for (var i = 0; i < recentTransactions.length; i++) {
         if (recentTransactions[i].date.day == weekDay.day &&
             recentTransactions[i].date.month == weekDay.month &&
             recentTransactions[i].date.year == weekDay.year) {
-          sumOfAmount += recentTransactions[i].amount;
+          totalSum += recentTransactions[i].amount;
         }
       }
 
       return {
         'day': DateFormat.E().format(weekDay).substring(0, 1),
-        'amount': sumOfAmount
+        'amount': totalSum,
       };
     }).reversed.toList();
   }
 
   double get totalSpending {
-    return groupedTransactionValues.fold(0.0, (previousValue, element) {
-      return previousValue + element['amount'];
+    return groupedTransactionValues.fold(0.0, (sum, item) {
+      return sum + item['amount'];
     });
   }
 
@@ -42,24 +45,20 @@ class Chart extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: groupedTransactionValues.map((e) {
-              return totalSpending == 0.0
-                  ? SizedBox()
-                  : Flexible(
-                      // İçinde bulunduğu container a göre şekil almasını sağlar
-                      fit: FlexFit.tight,
-                      // Hiçbir element kendi bölgesinden daha büyük olamasın
-                      // flex ile bulunulan bölgenin kaç x lik alanı kaplayacağı verilir
-                      // Flexible ile fit tight kullanılacaksa Expanded classı da
-                      // kullanılabilir
-                      child: ChartBar(
-                        e['day'],
-                        e['amount'],
-                        (e['amount'] as double) / totalSpending,
-                      ),
-                    );
-            }).toList()),
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: groupedTransactionValues.map((data) {
+            return Flexible(
+              fit: FlexFit.tight,
+              child: ChartBar(
+                data['day'],
+                data['amount'],
+                totalSpending == 0.0
+                    ? 0.0
+                    : (data['amount'] as double) / totalSpending,
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
